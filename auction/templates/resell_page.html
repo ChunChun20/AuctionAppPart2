@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+ {% block title %}
+    Create Item Page
+ {% endblock %}
+
+
+
+ {% block content %}
+<body>
+<div class="container create_item_form">
+<form method="POST" class="form-register" style="color:white;" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <br>
+    <h1 class="march_pink">
+        Resell your Item
+    </h1>
+
+    <div class="input-box">
+        <span class="icon"><ion-icon name="rocket-outline"></ion-icon></span>
+    {{ form.name(class="input")}}
+        <label>Item Name</label>
+        </div>
+
+    <div class="input-box">
+        <span class="icon"><ion-icon name="document-text-outline"></ion-icon></span>
+    {{ form.description(class="input")}}
+        <label>Item Description</label>
+        </div>
+
+<div class="input-box">
+        <span class="icon"><ion-icon name="cash-outline"></ion-icon></span>
+    {{ form.current_bid(class="input")}}
+<label>Starting bid</label>
+        </div>
+<div class="input-box">
+        <span class="icon"><ion-icon name="time-outline"></ion-icon></span>
+    {{ form.duration(class="input")}}
+<label>Auction Duration(days)</label>
+        </div>
+    <div class="input-box">
+    {{ form.category(class="input")}}
+<label>Category</label>
+        </div>
+<!--    {{ form.photo.label() }}-->
+    {{ form.photo(class="form-control-file customfile")}}
+
+    <br>
+    {{ form.submit(class="btn1") }}
+</form>
+    </div>
+</body>
+ {% endblock %}

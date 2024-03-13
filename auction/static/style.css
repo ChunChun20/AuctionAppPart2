@@ -1,0 +1,397 @@
+.success {
+    color: #fff;
+    background-color: #00cc00;
+    border-color: #00cc00;
+}
+
+
+.fail {
+    color: #fff;
+    background-color: #D2042D;
+    border-color: #D2042D;
+}
+
+.info {
+    color: #fff;
+    background-color: #45b7fe;
+    border-color: #45b7fe;
+
+    }
+
+.page_title {
+    color: #45b7fe;
+    font-weight:bold;
+}
+
+.btn-success {
+    color:black !important;
+    background-color:#00cc00 !important;
+    border-color: #00cc00 !important;
+    height: 40px; !important;
+    width: 120px; !important;
+}
+
+.btn-success:hover {
+    color:white !important;
+    background-color:#00cc00 !important;
+    border-color: #00cc00 !important;
+}
+
+.btn-success:focus {
+    color:white !important;
+
+}
+
+.btn-danger {
+    color:black !important;
+    height: 40px; !important;
+    width: 120px; !important;
+
+}
+
+.btn-danger:hover {
+    color:white !important;
+}
+
+.btn-danger:focus {
+    color:white !important;
+
+
+
+}
+
+.btn-warning {
+    color:black !important;
+    background-color: #ece75f !important;
+    border-color:  #ece75f !important;
+    height: 40px; !important;
+    width: 120px; !important;
+}
+
+.btn-warning:hover {
+    color:blue !important;
+}
+
+.btn-warning:focus {
+    color:blue !important;
+    border-color: #ece75f !important;
+
+}
+
+
+.btn-info {
+    color:black;
+    background-color: #45b7fe !important;
+    border-color:  #45b7fe !important;
+    height: 40px; !important;
+    width: 120px; !important;
+}
+
+
+.btn-light {
+    height: 40px; !important;
+    width: 120px; !important;
+}
+
+
+.btn-light:hover {
+    color:blue !important;
+}
+
+.table_head {
+    color: #00cc00;
+    background-color:#404040;
+
+}
+
+.my-btn {
+  margin-right: 5px;
+}
+
+
+.march_blue {
+    color: #89cfef;
+}
+
+.march_pink {
+    color: #162938;
+    text-align: center;
+    font-size: 2em;
+
+}
+
+
+.form-control {
+
+    width: 75%;
+
+}
+
+.custom-bid-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.border-info {
+    border: 3px solid slateblue;
+    border-radius: 10px;
+    padding: 2px;
+    color:white;
+    margin-bottom: 15px;
+}
+
+
+
+.register_form {
+         display: flex;
+         height: 100%;
+         place-items: center;
+         background: #89cfef;
+         padding-bottom: 50px;
+         margin-top: 50px;
+         width: 380px;
+         border-radius: 5px;
+    border: 2px solid rgba(255,255,255,.5);
+    justify-content: center;
+    align-items: center;
+     }
+
+.login_form {
+
+         display: flex;
+         height: 100%;
+         place-items: center;
+         background: #89cfef;
+         padding-bottom: 50px;
+         margin-top: 150px;
+         width: 380px;
+         border-radius: 5px;
+    border: 2px solid rgba(255,255,255,.5);
+    justify-content: center;
+    align-items: center;
+     }
+
+
+.create_item_form {
+    display: flex;
+         height: 100%;
+         place-items: center;
+         background: #89cfef;
+         padding-bottom: 50px;
+         margin-top: 50px;
+         width: 380px;
+         border-radius: 5px;
+    border: 2px solid rgba(255,255,255,.5);
+    justify-content: center;
+    align-items: center;
+
+
+}
+
+
+.input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    border-bottom: 2px solid #162938;
+    margin: 30px 0;
+}
+
+.input-box label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    font-size: 1em;
+    color: #162938;
+    font-weight: 500;
+    pointer-events: none;
+    transition: .5s;
+
+}
+
+.input {
+    width:100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    color: #162938;
+    font-weight: 600;
+    padding: 0 35px 0 5px;
+}
+
+.input:focus~label,
+.input:valid~label {
+    top: -5px;
+}
+
+.input-box .icon {
+    position: absolute;
+    right: 8px;
+    color:#162938;
+    font-size: 1.2em;
+    line-height: 57px;
+}
+
+
+
+.btn1 {
+    width:100%;
+    height: 45px;
+    background: #162938;
+    outline:none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    color: #fff;
+    font-weight: 500;
+}
+
+.btn1:hover {
+    color:greenyellow !important;
+    /*border-color: #ece75f !important;*/
+
+}
+
+.customfile {
+    border: 5px solid #000;
+    border-radius: 50px;
+    padding: 2px;
+    color:black;
+
+}
+
+
+
+.customfile::-webkit-file-upload-button {
+    background: #000;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 50px;
+    cursor: pointer;
+
+
+}
+
+.btn-bid {
+    width:75%;
+    height: 45px;
+    outline:none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    color: #fff;
+    font-weight: 500;
+}
+
+.btn-custom-bid {
+    width:75%;
+    height: 45px;
+    outline:none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    color: #fff;
+    font-weight: 500;
+
+}
+
+.dropdown-item {
+    background: #343a40;
+    color: #00cc00;
+}
+
+.border-bottom {
+     border-bottom: 1px solid #00cc00 !important;
+}
+
+.text-center {
+
+}
+
+.navbar-nav li.nav-item a.nav-link:focus {
+    color: #00cc00;}
+
+.dollar-sign {
+    color: forestgreen;
+}
+
+.navbar-nav .nav-item a.nav-link-button:hover {
+          color: darkblue !important;
+          border-bottom: 1px solid darkblue;
+}
+.money {
+    font-weight: bold;
+      }
+
+.nav-link {
+         color: #1D1D1D !important;
+      }
+
+.navbar {
+    height: 60px;
+    padding: 10px 10px;
+
+}
+
+.navbar-brand {
+    color: #323232 !important;
+}
+
+
+.mail {
+    background-color: #fff;
+    padding: 20px;
+    /*margin-bottom: 20px;*/
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.mail h2 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.mail p {
+    margin: 0;
+    color: #666;
+}
+
+.mail p strong {
+    color: #333;
+}
+
+.mail-padding {
+    padding:25px;
+}
+
+.Mailbox{
+    text-align:center;
+    font-family: Arial, sans-serif;
+    color: #00cc00;
+}
+
+.custom-modal {
+    background-color: #212121;
+}
+
+.description-container {
+    border: 2px solid #00cc00;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 25px;
+}
+
+.modal-image {
+    max-width: 100%;
+    height: auto;
+}
+
+.subject_underline {
+    text-decoration: underline;
+}

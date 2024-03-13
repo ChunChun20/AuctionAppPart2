@@ -1,0 +1,197 @@
+<style>
+  .modal-content {
+    background-color: #212121
+  }
+
+
+
+
+
+</style>
+
+<!-- More Info -->
+<div class="modal fade" id="Modal-MoreInfo-{{ item.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content custom-modal">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="ModalLabel">
+                    {{ item.name[:-6] }}
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div id="descriptionCollapse-{{ item.id }}">
+                        <p id="shortDescription-{{ item.id }}">{{ item.description[:100] }}...</p> <!-- Show only the first 100 characters -->
+                        <p id="fullDescription-{{ item.id }}" class="collapse">{{ item.description }}</p> <!-- Full description -->
+                    </div>
+                    <a href="#" id="showMoreButton-{{ item.id }}" class="btn btn-link" onclick="toggleDescription({{ item.id }})">Show more</a> <!-- Button to show more -->
+                </div>
+                <div class="text-center mt-3">
+                    <img class="modal-image" src="{{ url_for('static', filename='images/' + item.image) }}" alt="">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bid Confirm -->
+<div class="modal fade" id="Modal-BidConfirm-{{ item.id }}"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div style="background-color:#212121;" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="{{ item.id }}">
+          <!-- -->
+          {{ item.name[:-6] }}
+
+        </h5>
+      </div>
+      <div class="modal-body">
+        <form method="POST">
+            {{ bid_form.hidden_tag() }}
+          <h4 class="text-center"> Minimum next bid is: {{ item.minimum_next_bid() }}$</h4>
+            <input id="bid_item" name="bid_item" type="hidden" value="{{ item.name }}">
+          {{ bid_form.submit(id="update-items-button-" ~ item.id,class="btn-bid btn-success") }}
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+                data-dismiss="modal">Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Bid Confirm -->
+<div class="modal fade" id="Modal-CustomBidConfirm-{{ item.id }}"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div style="background-color:#212121;" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ModalLabel">
+          <!-- -->
+          {{ item.name[:-6] }}
+
+        </h5>
+      </div>
+      <div class="modal-body">
+        <form method="POST">
+            {{ custom_bid_form.hidden_tag() }}
+          <h4 class="text-center">Enter custom bid above {{ item.minimum_next_bid() }}$: </h4>
+          <div class="custom-bid-container">
+             {{ custom_bid_form.custom_bid(class="form-control",placeholder="Enter bid") }}
+          </div>
+
+          <input id="custom_bid_item" name="custom_bid_item" type="hidden" value="{{ item.name }}">
+            {{ custom_bid_form.submit(id="update-custom-items-button-" ~ item.id,class="btn-custom-bid btn-warning") }}
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+                data-dismiss="modal">Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--mail seller modal-->
+<div class="modal fade" id="Modal-MailSeller-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="MailSellerModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div style="background-color:#212121;" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="MailSellerModal">Mail Seller</h5>
+            </div>
+            <div class="modal-body">
+                <form action="/send_mail_to_seller" method="post">
+                    <!-- User ID Field -->
+                    <input type="hidden" name="seller_id" value="{{ item.seller_id }}">
+
+                    <!-- Subject Field -->
+                    <label for="subject">Subject:</label>
+                    <div class="custom-bid-container">
+                        <input type="text" class="form-control" id="subject" name="subject" required>
+                    </div>
+
+                    <!-- Message Field -->
+                    <label for="message">Message:</label>
+                    <div class="custom-bid-container">
+                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Send Mail</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+
+    function toggleDescription(itemId) {
+        var shortDescription = document.getElementById('shortDescription-' + itemId);
+        var fullDescription = document.getElementById('fullDescription-' + itemId);
+        var showMoreButton = document.getElementById('showMoreButton-' + itemId);
+
+        if (shortDescription.classList.contains('collapse')) {
+            shortDescription.classList.remove('collapse');
+            fullDescription.classList.add('collapse');
+            showMoreButton.innerText = 'Show less';
+        } else {
+            shortDescription.classList.add('collapse');
+            fullDescription.classList.remove('collapse');
+            showMoreButton.innerText = 'Show more';
+        }
+    }
+
+
+   var socket = io();
+
+
+  function updateModal(item,next_bid) {
+  var modalBidContent = '<h4 class="text-center">Minimum next bid is: ' + next_bid + '$ </h4>';
+  var modalCustomBidContent = '<h4 class="text-center">Enter custom bid above ' + next_bid + '$: </h4>';
+  var modalBidElem = document.querySelector('#Modal-BidConfirm-' + item.id);
+  var modalCustomBidElem = document.querySelector('#Modal-CustomBidConfirm-' + item.id);
+  modalBidElem.querySelector('.text-center').innerHTML = modalBidContent;
+  modalCustomBidElem.querySelector('.text-center').innerHTML = modalCustomBidContent;
+}
+
+function updateCustomModal(item,next_bid) {
+  var modalContent = '<h4 class="text-center">Enter custom bid above ' + next_bid + '$: </h4>';
+  var modalElem = document.querySelector('Modal-CustomBidConfirm-' + item.id);
+  modalElem.querySelector('.text-center').innerHTML = modalContent;
+}
+
+
+   {% for item in items %}
+
+
+
+   var updateItemsButton = document.querySelector('#update-items-button-{{ item.id }}');
+   updateItemsButton.addEventListener('click', function() {
+       console.log('update-items button clicked');
+       socket.emit('update_items');
+   });
+
+
+   var updateCustomItemsButton = document.querySelector('#update-custom-items-button-{{ item.id }}');
+   updateCustomItemsButton.addEventListener('click', function() {
+       console.log('update-custom-items button clicked');
+       socket.emit('update_items');
+   });
+
+    {% endfor %}
+</script>
+

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}
+Owned items
+{% endblock %}
+{% block content %}
+<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
+    <table class="table table-hover table-dark">
+        <thead class="table_head">
+            <tr>
+
+
+                <th scope="col">Name</th>
+                <th scope="col">Category</th>
+                <th scope="col">Sold</th>
+                <th scope="col">Purchase price</th>
+                <th scope="col">Purchase date</th>
+                <th scope="col">Winner</th>
+                <th scope="col">Info</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for item in recently_sold %}
+            {% include 'includes/info_modal.html' %}
+                <tr>
+                    <td>{{ item.name[:-6] }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.sold }}</td>
+                    <td>{{ item.current_bid }}$</td>
+                    <td>{{ item.end }}</td>
+                    <td>{{ item.bidder_id }}</td>
+                    <td><button class="btn btn-outline btn-info" data-toggle="modal" data-target="#Modal-MoreInfo-{{ item.id }}">Info</button></td>
+
+                </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

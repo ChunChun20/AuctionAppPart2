@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}
+    Welcome to my Auction
+{% endblock %}
+{% block content %}
+    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 bg-dark" style="color:white;">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8 text-left align-self-center">
+                <div class="col-md-10 p-lg-5 mx-auto my-5">
+                    <h1 class="display-4 font-weight-normal" style="color: #323232">Online Auction</h1>
+                    <p class="lead font-weight-normal" style="color: #323232">To participate click the link below</p>
+                    <a class="btn btn-primary" style="background-color: #213F99 !important;border-color: #213F99" href="{{ url_for('auction_page') }}">Get Started</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <img src="static/hammerbid1.png" class="img-responsive" alt="" style="max-width: 100%;">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
