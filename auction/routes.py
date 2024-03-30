@@ -1,5 +1,6 @@
 import time
 
+from flask_socketio import emit
 from sqlalchemy import desc
 
 # from auction import app,db
@@ -32,37 +33,44 @@ def auction_page():
         bid_item = request.form.get('bid_item')
         bid_item_object = Item.query.filter_by(name=bid_item).first()
         if bid_item_object:
-            if current_user.can_bid(bid_item_object):
-                if bid_item_object.bidder_id != None:
-                    #refund money if outbid
-                    old_bidder = User.query.filter_by(username=bid_item_object.bidder_id).first()
-                    old_bidder.budget += bid_item_object.current_bid
-                #assign highest bidder
-                bid_item_object.bidder_id = current_user.username
-                bid_item_object.current_bid = round(bid_item_object.current_bid * bid_item_object.step,2)
-                current_user.budget -= round(bid_item_object.current_bid,2)
-                db.session.commit()
-                flash(f"Successfully placed a bid on {bid_item_object.name[:-6]}!",'success')
+            if bid_item_object.owner == None:
+                if current_user.can_bid(bid_item_object):
+                    if bid_item_object.bidder_id != None:
+                        #refund money if outbid
+                        old_bidder = User.query.filter_by(username=bid_item_object.bidder_id).first()
+                        old_bidder.budget += bid_item_object.current_bid
+                    #assign highest bidder
+                    bid_item_object.bidder_id = current_user.username
+                    bid_item_object.current_bid = round(bid_item_object.current_bid * bid_item_object.step,2)
+                    current_user.budget -= round(bid_item_object.current_bid,2)
+                    db.session.commit()
+                    flash(f"Successfully placed a bid on {bid_item_object.name[:-6]}!",'success')
+                else:
+                    flash(f"Your bid on: {bid_item_object.name[:-6]} failed!",'fail')
             else:
-                flash(f"Your bid on: {bid_item_object.name[:-6]} failed!",'fail')
+                flash(f"Bidding period on {bid_item_object.name[:-6]} is over!", 'fail')
 
         custom_bid_item = request.form.get('custom_bid_item')
         custom_bid_item_object = Item.query.filter_by(name=custom_bid_item).first()
         if custom_bid_item_object:
-            if current_user.can_custom_bid(custom_bid_item_object,custom_bid_form.custom_bid.data):
-                # refund money if outbid
-                if custom_bid_item_object.bidder_id != None:
-                    old_bidder = User.query.filter_by(username=custom_bid_item_object.bidder_id).first()
-                    old_bidder.budget += custom_bid_item_object.current_bid
-                # assign highest bidder
-                custom_bid_item_object.bidder_id = current_user.username
-                custom_bid_item_object.current_bid = custom_bid_form.custom_bid.data
-                current_user.budget -= round(custom_bid_item_object.current_bid,2)
-                db.session.commit()
+            if custom_bid_item_object.owner == None:
+                if current_user.can_custom_bid(custom_bid_item_object,custom_bid_form.custom_bid.data):
+                    # refund money if outbid
+                    if custom_bid_item_object.bidder_id != None:
+                        old_bidder = User.query.filter_by(username=custom_bid_item_object.bidder_id).first()
+                        old_bidder.budget += custom_bid_item_object.current_bid
 
-                flash(f"Successfully placed a bid on {custom_bid_item_object.name[:-6]}!",'success')
+                    # assign highest bidder
+                    custom_bid_item_object.bidder_id = current_user.username
+                    custom_bid_item_object.current_bid = custom_bid_form.custom_bid.data
+                    current_user.budget -= round(custom_bid_item_object.current_bid,2)
+                    db.session.commit()
+
+                    flash(f"Successfully placed a bid on {custom_bid_item_object.name[:-6]}!",'success')
+                else:
+                    flash(f"Please place a higher bid!",'fail')
             else:
-                flash(f"Please place a higher bid!",'fail')
+                flash(f"Bidding period on {custom_bid_item_object.name[:-6]} is over!", 'fail')
 
         return redirect(url_for('auction_page'))
 
@@ -70,10 +78,99 @@ def auction_page():
         items = Item.query.filter_by(owner=None)
         return render_template('auctions.html',items=items,bid_form=bid_form,custom_bid_form=custom_bid_form)
 
+
+@app.route('/auctions_bid_mobile',methods=['POST'])
+def auctions_bid_mobile():
+    data = request.json
+    bid_item = data.get('itemName')
+    currentUser = data.get('currentUser')
+
+
+
+    bid_item_object = Item.query.filter_by(name=bid_item).first()
+    user = User.query.filter_by(username=currentUser).first()
+    if bid_item_object:
+        if user.can_bid(bid_item_object):
+            if bid_item_object.bidder_id != None:
+                    #refund money if outbid
+                old_bidder = User.query.filter_by(username=bid_item_object.bidder_id).first()
+                old_bidder.budget += bid_item_object.current_bid
+            if bid_item_object.owner:
+                return jsonify({'success': False, 'message': f'Bidding period has ended.'}), 200
+
+                #assign highest bidder
+            bid_item_object.bidder_id = user.username
+            bid_item_object.current_bid = round(bid_item_object.current_bid * bid_item_object.step,2)
+            user.budget -= round(bid_item_object.current_bid,2)
+            db.session.commit()
+            time.sleep(0.5)
+            items = Item.query.filter_by(owner=None).all()
+            items_dict = [item.to_dict() for item in items]
+            print(items_dict)
+            socketio.emit('updated_items', items_dict)
+            print("Items updated")
+
+
+            return jsonify({'success': True, 'message': f'Successfully placed bid on {bid_item[:-6]}'}), 200
+
+        else:
+
+            return jsonify({'success': False, 'message': f'Failed to place bid on {bid_item[:-6]}'}), 200
+
+
+@app.route('/auctions_custom_bid_mobile',methods=['POST'])
+def auctions_custom_bid_mobile():
+    data = request.json
+    custom_bid_item = data.get('itemName')
+    currentUser = data.get('currentUser')
+    customBid = data.get('customBid')
+    print(f"is it empty {custom_bid_item},{currentUser},{customBid}")
+
+
+
+
+    user = User.query.filter_by(username=currentUser).first()
+    custom_bid_item_object = Item.query.filter_by(name=custom_bid_item).first()
+    if custom_bid_item_object:
+        if user.can_custom_bid(custom_bid_item_object, float(customBid)):
+            # refund money if outbid
+            if custom_bid_item_object.bidder_id != None:
+                old_bidder = User.query.filter_by(username=custom_bid_item_object.bidder_id).first()
+                old_bidder.budget += custom_bid_item_object.current_bid
+            if custom_bid_item_object.owner:
+                return jsonify({'success': False, 'message': f'Bidding period has ended.'}), 200
+
+            # assign highest bidder
+            custom_bid_item_object.bidder_id = user.username
+            custom_bid_item_object.current_bid = float(customBid)
+            user.budget -= round(custom_bid_item_object.current_bid, 2)
+            db.session.commit()
+            time.sleep(0.5)
+            items = Item.query.filter_by(owner=None).all()
+            items_dict = [item.to_dict() for item in items]
+            print(items_dict)
+            socketio.emit('updated_items', items_dict)
+            print("Items updated")
+            return jsonify({'success': True, 'message': f'Successfully placed custom bid on {custom_bid_item[:-6]}'}), 200
+        else:
+
+            return jsonify({'success': False, 'message': f'Failed to place custom bid on {custom_bid_item[:-6]}'}), 200
+
+
+@app.route('/get_next_bid/<string:item_id>', methods=['GET'])
+def get_next_bid(item_id):
+
+    item = Item.query.filter_by(id=int(item_id)).first()
+    minimum_next_bid = item.minimum_next_bid()
+
+    return jsonify({'success': True, "minimum_next_bid": minimum_next_bid}), 200
+
+
+
 @app.route('/auctions_mobile', methods=['GET'])
 def auctions_mobile():
     auctions = Item.query.filter_by(owner=None)
-    auctions_json = [{'category': item.category, 'name': item.name, 'bid': item.current_bid,'end': item.end, 'highest_bidder': item.bidder_id} for item in auctions]
+    auctions_json = [{'id': item.id,'description': item.description,'start': item.start,'category': item.category, 'name': item.name,'seller_id': item.seller_id, 'bid': item.current_bid,'end': item.end, 'highest_bidder': item.bidder_id} for item in auctions]
     return jsonify(auctions=auctions_json)
 
 
@@ -151,6 +248,55 @@ def register_page():
             flash(error,'fail')
     return render_template('register.html',form=form)
 
+
+@app.route('/register_mobile',methods=['POST'])
+def register_page_mobile():
+    data = request.json
+    username = data.get('username')
+    password1 = data.get('password1')
+    password2 = data.get('password2')
+    email = data.get('email_address')
+    phone = data.get('phone_number')
+
+    email_address = User.query.filter_by(email_address=email).first()
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return jsonify({'success': False, 'message': 'user already exist'}), 401
+    if email_address:
+        return jsonify({'success': False, 'message': 'user already exist'}), 401
+
+    if username == "" or len(username) < 6:
+        return jsonify({'success': False, 'message': 'invalid username'}), 401
+
+    if email == "" or "@" not in email:
+        return jsonify({'success': False, 'message': 'invalid email'}), 401
+
+    if password1 == "" or len(password1) < 7:
+        return jsonify({'success': False, 'message': 'invalid password'}), 401
+
+    if password2 == "" or len(password2) < 7:
+        return jsonify({'success': False, 'message': 'invalid password'}), 401
+
+    if phone == "" or len(phone) < 10:
+        return jsonify({'success': False, 'message': 'invalid phone number'}), 401
+
+
+
+    if password1 == password2:
+        create_user = User(username=username,
+                           email_address=email,
+                           password=password1,
+                           phone_number=f"+359" + phone[1:])
+        db.session.add(create_user)
+        db.session.commit()
+
+
+        return jsonify({'success': True, 'message': 'successfully created user'}), 200
+    else:
+        # Authentication failed
+        return jsonify({'success': False, 'message': 'failed to create user'}), 401
+
+
 @app.route('/login',methods=['GET','POST'])
 def login_page():
     form = LoginForm()
@@ -165,6 +311,47 @@ def login_page():
         else:
             flash("Wrong username or password!",'fail')
     return render_template('login.html',form=form)
+
+
+@app.route('/login_mobile',methods=['POST'])
+def login_page_mobile():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    user_trying_to_login = User.query.filter_by(username=username).first()
+    if user_trying_to_login and user_trying_to_login.check_password(
+            password_for_checking=password):
+        user_info = {
+            'username': user_trying_to_login.username,
+            'budget': str(round(user_trying_to_login.budget,2)),
+            'id': user_trying_to_login.id
+        }
+
+
+        return jsonify({'success': True, 'user': user_info}), 200
+    else:
+        # Authentication failed
+        return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
+
+
+@app.route('/get_user_data',methods=['POST'])
+def get_user_data():
+    data = request.json
+    user_id = data.get('id')
+
+    user = User.query.filter_by(id=int(user_id)).first()
+
+
+    user_info = {
+        'username': user.username,
+        'budget': user.budget,
+        'id': user.id,
+    }
+
+    return jsonify({'success': True, 'user': user_info}), 200
+
+
 
 @app.route('/logout')
 def logout_page():
@@ -214,25 +401,87 @@ def save_image(picture_file):
     picture_file.save(picture_path)
     return picture
 
+@app.route('/create_item_mobile',methods=['POST'])
+def create_item_mobile_page():
+    name = request.form['name']
+    category = request.form['category']
+    description = request.form['description']
+    bid = request.form['bid']
+    duration = request.form['duration']
+    user_id = request.form['id']
+
+    # Save the image
+    image = request.files['image']
+
+    current_time = datetime.now()
+
+    if name == "":
+        return jsonify({'success': False, 'message': 'Username too short'}), 401
+
+    if description == "" or len(description) > 1024:
+        return jsonify({'success': False, 'message': 'invalid description'}), 401
+
+    if int(bid) <= 0:
+        return jsonify({'success': False, 'message': 'invalid starting price'}), 401
+
+    if int(duration) <= 0:
+        return jsonify({'success': False, 'message': 'invalid duration'}), 401
+
+    if image == "":
+        return jsonify({'success': False, 'message': 'invalid image'}), 401
+
+    image_file = save_image(image)
+    random_number = random.randint(100000, 999999)
+    create_item = Item(name=name+str(random_number),
+                        description=description,
+                        start=current_time.strftime("%m/%d/%Y, %H:%M:%S"),
+                        end=(current_time + timedelta(minutes=int(duration))).strftime("%m/%d/%Y, %H:%M:%S"),
+                        current_bid=float(bid),
+                        step=1.10,
+                        image=image_file,
+                        seller_id = int(user_id),
+                        category = category,
+                        sold = "False"
+                               )
+
+
+
+    db.session.add(create_item)
+    db.session.commit()
+
+
+        # flash(f"Successfully created {create_item.name[:-6]}",'success')
+
+    return jsonify({'success': True}), 200
+
+
 
 @app.route('/owned_items')
 def owned_items_page():
-    owned_items = Item.query.filter_by(owner=current_user.id)
+    owned_items = Item.query.filter_by(owner=current_user.id).order_by(desc(Item.end)).all()
+
 
     return render_template('owned_items.html',owned_items=owned_items)
 
 
+@app.route('/owned_items_mobile/<string:user_id>', methods=['GET'])
+def owned_items_mobile(user_id):
+    owned_items = Item.query.filter_by(owner=int(user_id))
+    owned_items_json = [{'end': item.end, 'name': item.name, 'bid': item.current_bid,'category': item.category,'description': item.description,'id': item.id} for item in owned_items]
+    return jsonify(owned_items=owned_items_json)
+
+
 @app.route('/recently_sold', methods=['GET'])
 def recently_sold_items():
-    recently_sold = Item.query.filter_by(sold="True")
+    recently_sold = Item.query.filter_by(sold="True").order_by(desc(Item.end)).all()
             
     return render_template('recently_sold.html', recently_sold=recently_sold)
 
 
 @app.route('/recently_sold_mobile', methods=['GET'])
 def recently_sold_items_mobile():
-    recently_sold = Item.query.filter_by(sold="True")
-    recently_sold_json = [{'category': item.category, 'name': item.name, 'bid': item.current_bid} for item in recently_sold]
+    recently_sold = Item.query.filter_by(sold="True").order_by(desc(Item.end)).all()
+    recently_sold_json = [{'category': item.category, 'name': item.name, 'bid': item.current_bid,'description':item.description,'end': item.end,'id': item.id} for item in recently_sold]
     return jsonify(recently_sold=recently_sold_json)
 
 
@@ -283,7 +532,7 @@ def resell_page(item_id):
 
         return redirect(url_for('auction_page'))
 
-    if form.errors != {}:  # if there are not errors from validations
+    if form.errors != {}:
         for error in form.errors.values():
             flash(error, 'fail')
 
@@ -341,12 +590,67 @@ def send_mail_to_seller():
     return redirect(url_for('auction_page'))
 
 
+@app.route('/send_mail_to_seller_mobile', methods=['POST'])
+def send_mail_to_seller_mobile():
+    data = request.json
+    receiver = data.get('sender_id')
+    subject = data.get('subject')
+    message = data.get('message')
+    sender = data.get('receiver_id')
+    sender_username = data.get('username')
+    current_time = datetime.now()
+
+
+    timeOfSending = current_time.strftime("%m/%d/%Y, %H:%M:%S")
+
+
+    create_mail = Mail(
+        subject=subject,
+        message=message,
+        sender_id=sender,
+        receiver_id=receiver,
+        date=timeOfSending,
+        sender_username=sender_username
+
+    )
+
+    db.session.add(create_mail)
+    db.session.commit()
+
+    return jsonify({'success': True}), 200
+
+
 
 @app.route('/mail_box')
 def mail_box():
     mails = Mail.query.filter_by(receiver_id=current_user.id).order_by(desc(Mail.date)).all()
 
     return render_template('mailbox.html', mails=mails)
+@app.route('/mail_box_mobile', methods=['POST'])
+def get_user_mail_box():
+    data = request.json
+    user_id = data.get('id')
+
+    mails = Mail.query.filter_by(receiver_id=int(user_id)).order_by(desc(Mail.date)).all()
+
+    mail_info_list = []
+    for mail in mails:
+        mail_info = {
+            'id': mail.id,
+            'subject': mail.subject,
+            'message': mail.message,
+            'sender': mail.sender_id,
+            'sender_username': mail.sender_username,
+            'receiver': mail.receiver_id,
+            'date': mail.date
+        }
+        mail_info_list.append(mail_info)
+
+
+    print(mail_info_list)
+    return jsonify({'success': True, 'mails':  mail_info_list}), 200
+
+
 
 
 @app.route('/delete_mail/<int:mail_id>', methods=['POST', 'DELETE'])
@@ -361,6 +665,27 @@ def delete_mail(mail_id):
 
 
         return redirect(url_for('mail_box'))
+
+
+@app.route('/delete_mail_mobile/<string:mail_id>', methods=['DELETE'])
+def delete_mail_mobile(mail_id):
+
+    mail_to_be_deleted = Mail.query.filter_by(id=int(mail_id)).first()
+    db.session.delete(mail_to_be_deleted)
+    db.session.commit()
+
+    return jsonify({'success': True}), 200
+
+@app.route('/delete_item_mobile/<string:item_id>', methods=['DELETE'])
+def delete_item_mobile(item_id):
+        item = Item.query.filter_by(id=int(item_id)).first()
+
+
+        db.session.delete(item)
+        db.session.commit()
+
+
+        return jsonify({'success': True}), 200
 
 
 
