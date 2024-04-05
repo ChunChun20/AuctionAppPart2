@@ -9,7 +9,7 @@
 
 <!-- More Info -->
 <div class="modal fade" id="Modal-MoreInfo-{{ item.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog ">
+    <div class="modal-dialog">
         <div class="modal-content custom-modal">
             <div class="modal-header">
                 <h5 class="modal-title text-center" id="ModalLabel">
@@ -17,11 +17,14 @@
                 </h5>
             </div>
             <div class="modal-body">
-                <!-- Enhanced description container -->
-                <div class="description-container">
-                    {{ item.description }}
+                <div>
+                    <div id="descriptionCollapse-{{ item.id }}">
+                        <p id="shortDescription-{{ item.id }}">{{ item.description[:100] }}...</p> <!-- Show only the first 100 characters -->
+                        <p id="fullDescription-{{ item.id }}" class="collapse">{{ item.description }}</p> <!-- Full description -->
+                    </div>
+                    <a href="#" id="showMoreButton-{{ item.id }}" class="btn btn-link" onclick="toggleDescription('{{ item.id }}')">Show more</a> <!-- Button to show more -->
                 </div>
-                <div class="text-center">
+                <div class="text-center mt-3">
                     <img class="modal-image" src="{{ url_for('static', filename='images/' + item.image) }}" alt="">
                 </div>
             </div>
@@ -31,3 +34,22 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    function toggleDescription(itemId) {
+        var shortDescription = document.getElementById('shortDescription-' + itemId);
+        var fullDescription = document.getElementById('fullDescription-' + itemId);
+        var showMoreButton = document.getElementById('showMoreButton-' + itemId);
+
+        if (shortDescription.classList.contains('collapse')) {
+            shortDescription.classList.remove('collapse');
+            fullDescription.classList.add('collapse');
+            showMoreButton.innerText = 'Show more';
+        } else {
+            shortDescription.classList.add('collapse');
+            fullDescription.classList.remove('collapse');
+            showMoreButton.innerText = 'Show less';
+        }
+    }
+</script>

@@ -1,3 +1,4 @@
+import base64
 import time
 
 from flask_socketio import emit
@@ -13,6 +14,9 @@ from auction.forms import UserRegisterForm,ItemRegisterForm,LoginForm,BidForm,Cu
 from flask_login import login_user,logout_user,login_required,current_user
 from auction.funcs import check_auctions
 import threading,random
+from PIL import Image
+from math import ceil
+import io
 import os
 
 
@@ -167,10 +171,27 @@ def get_next_bid(item_id):
 
 
 
+
 @app.route('/auctions_mobile', methods=['GET'])
 def auctions_mobile():
     auctions = Item.query.filter_by(owner=None)
-    auctions_json = [{'id': item.id,'description': item.description,'start': item.start,'category': item.category, 'name': item.name,'seller_id': item.seller_id, 'bid': item.current_bid,'end': item.end, 'highest_bidder': item.bidder_id} for item in auctions]
+    auctions_json = []
+    for item in auctions:
+        image_path = os.path.join(app.root_path, 'static', 'images', item.image)
+        img_data = get_image_data(image_path)
+        auction_data = {
+            'id': item.id,
+            'description': item.description,
+            'start': item.start,
+            'category': item.category,
+            'name': item.name,
+            'seller_id': item.seller_id,
+            'bid': item.current_bid,
+            'end': item.end,
+            'highest_bidder': item.bidder_id,
+            'image': img_data  # Include image data in the response
+        }
+        auctions_json.append(auction_data)
     return jsonify(auctions=auctions_json)
 
 
@@ -401,6 +422,18 @@ def save_image(picture_file):
     picture_file.save(picture_path)
     return picture
 
+def get_image_data(image_path):
+    with Image.open(image_path) as img:
+        # Convert the image to RGB mode (remove alpha channel)
+        img = img.convert('RGB')
+        # Resize and compress the image
+        img.thumbnail((600, 600))  # Resize image to fit within 300x300 pixels
+        img_io = io.BytesIO()
+        img.save(img_io, format='JPEG', quality=80)  # Compress the image with JPEG format and 70% quality
+        img_data = base64.b64encode(img_io.getvalue()).decode('utf-8')
+
+        return img_data
+
 @app.route('/create_item_mobile',methods=['POST'])
 def create_item_mobile_page():
     name = request.form['name']
@@ -466,25 +499,73 @@ def owned_items_page():
 
 @app.route('/owned_items_mobile/<string:user_id>', methods=['GET'])
 def owned_items_mobile(user_id):
-    owned_items = Item.query.filter_by(owner=int(user_id))
-    owned_items_json = [{'end': item.end, 'name': item.name, 'bid': item.current_bid,'category': item.category,'description': item.description,'id': item.id} for item in owned_items]
-    return jsonify(owned_items=owned_items_json)
+    page = request.args.get('page', default=1, type=int)
+    per_page = 5
+    owned_items = Item.query.filter_by(owner=int(user_id)).order_by(desc(Item.end)).paginate(page=page,per_page=per_page)
+
+    owned_items_json = []
+    for item in owned_items:
+        image_path = os.path.join(app.root_path, 'static', 'images', item.image)
+        img_data = get_image_data(image_path)
+        owned_items_data = {
+            'end': item.end,
+            'name': item.name,
+            'bid': item.current_bid,
+            'category': item.category,
+            'description': item.description,
+            'id': item.id,
+            'image': img_data  # Include image data in the response
+        }
+        owned_items_json.append(owned_items_data)
+
+    total_pages = ceil(owned_items.total / per_page)
+
+    return jsonify(owned_items=owned_items_json,
+                   page=owned_items.page,
+                    pages=owned_items.pages,
+                    total_pages=total_pages,
+                    total_items=owned_items.total)
 
 
 @app.route('/recently_sold', methods=['GET'])
 def recently_sold_items():
     recently_sold = Item.query.filter_by(sold="True").order_by(desc(Item.end)).all()
-            
+
     return render_template('recently_sold.html', recently_sold=recently_sold)
 
 
 @app.route('/recently_sold_mobile', methods=['GET'])
 def recently_sold_items_mobile():
-    recently_sold = Item.query.filter_by(sold="True").order_by(desc(Item.end)).all()
-    recently_sold_json = [{'category': item.category, 'name': item.name, 'bid': item.current_bid,'description':item.description,'end': item.end,'id': item.id} for item in recently_sold]
-    return jsonify(recently_sold=recently_sold_json)
+    page = request.args.get('page', default=1, type=int)
+    per_page = 5
 
+    recently_sold = Item.query.filter_by(sold="True").order_by(desc(Item.end)).paginate(page=page,per_page=per_page)
 
+    recently_sold_json = []
+
+    for item in recently_sold.items:  # Iterate over .items, not the paginator object itself
+        image_path = os.path.join(app.root_path, 'static', 'images', item.image)
+        img_data = get_image_data(image_path)
+        recently_sold_data = {
+            'category': item.category,
+            'name': item.name,
+            'bid': item.current_bid,
+            'description': item.description,
+            'end': item.end,
+            'id': item.id,
+            'image': img_data  # Include image data in the response
+        }
+        recently_sold_json.append(recently_sold_data)
+
+    total_pages = ceil(recently_sold.total / per_page)
+
+    return jsonify(
+        recently_sold=recently_sold_json,
+        page=recently_sold.page,
+        pages=recently_sold.pages,
+        total_pages=total_pages,
+        total_items=recently_sold.total
+    )
 
 @app.route('/resell/<int:item_id>', methods=['GET', 'POST'])
 def resell_page(item_id):
@@ -686,9 +767,6 @@ def delete_item_mobile(item_id):
 
 
         return jsonify({'success': True}), 200
-
-
-
 
 
 thread = threading.Thread(target=check_auctions)

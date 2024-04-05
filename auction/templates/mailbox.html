@@ -8,35 +8,37 @@
 
 <body>
 
-<!--    <h1 class="Mailbox">User Mailbox</h1>-->
+    <!--    <h1 class="Mailbox">User Mailbox</h1>-->
 
     {% if mails %}
     {% for mail in mails %}
         {% include 'includes/reply_modal.html' %}
 
         <div class="mail-padding mb-0">
-            <div class="mail row">
-                <div class="col-md-12">
-                    <h2 class="subject_underline">Subject: {{ mail.subject }}</h2>
-                    <p><strong>From:</strong> {{ mail.sender_username }}</p>
-                    <p><strong>Date:</strong> {{ mail.date }}</p>
-                    <p><strong>Message:</strong> {{ mail.message }}</p>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-outline btn-primary" data-toggle="modal" data-target="#Modal-ReturnMail-{{ mail.id }}">Reply</button>
-                    <form method="post" action="{{ url_for('delete_mail', mail_id=mail.id) }}" style="display: inline;">
-                        <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" class="btn btn-outline btn-danger">Delete Mail</button>
-                    </form>
-                </div>
+    <div class="mail row">
+        <div class="col-md-12">
+            <h2 class="subject_underline">Title: {{ mail.subject }}</h2>
+            <div class="info-line">
+                <p class="from"><strong>From:</strong> {{ mail.sender_username }}</p>
+                <p class="date"><strong>Date:</strong> {{ mail.date }}</p>
+            </div>
+            <p><strong>Message:</strong> {{ mail.message }}</p>
+            <div class="button-container">
+                <button class="reply_btn" data-toggle="modal" data-target="#Modal-ReturnMail-{{ mail.id }}">Reply Mail</button>
+                <form method="post" action="{{ url_for('delete_mail', mail_id=mail.id) }}" style="display: inline;">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="delete_mail_btn">Delete Mail</button>
+                </form>
             </div>
         </div>
+    </div>
+</div>
     {% endfor %}
-{% else %}
+    {% else %}
     <div style="text-align: center;margin-top: 20px;">
         <h2>No mails to display.</h2>
     </div>
-{% endif %}
+    {% endif %}
 </body>
 
 {% endblock %}
