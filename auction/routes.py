@@ -15,6 +15,7 @@ from flask_login import login_user,logout_user,login_required,current_user
 from auction.funcs import check_auctions
 import threading,random
 from PIL import Image
+import qrcode
 from math import ceil
 import io
 import os
@@ -334,6 +335,30 @@ def login_page():
     return render_template('login.html',form=form)
 
 
+url = "https://drive.usercontent.google.com/download?id=1BI7_6wGB0K5ktZ_5B5uIhGanEbuzle5i&export=download&authuser=0"
+qr = qrcode.QRCode(
+    version=1,
+    error_correction=qrcode.constants.ERROR_CORRECT_L,
+    box_size=10,
+    border=4,
+    )
+qr.add_data(url)
+qr.make(fit=True)
+
+img = qr.make_image(fill='black',back_color='white')
+
+static_folder = os.path.join(app.root_path, 'static')
+img_path = os.path.join(static_folder, 'qr_code.png')
+
+    # Save the image
+img.save(img_path)
+
+@app.route('/download_mobile_app')
+def download_mobile_app():
+
+
+    return render_template('downloadApp.html')
+
 @app.route('/login_mobile',methods=['POST'])
 def login_page_mobile():
     data = request.json
@@ -631,6 +656,7 @@ def delete_item(item_id):
         db.session.delete(item)
         db.session.commit()
 
+        flash(f"Successfully deleted item '{item.name[:-6]}' ", 'success')
 
         return redirect(url_for('owned_items_page'))
 
@@ -668,7 +694,7 @@ def send_mail_to_seller():
     print(f"{seller_id},{subject},{message}")
 
 
-    return redirect(url_for('auction_page'))
+    return redirect(url_for('mail_box'))
 
 
 @app.route('/send_mail_to_seller_mobile', methods=['POST'])
@@ -744,6 +770,7 @@ def delete_mail(mail_id):
         db.session.delete(mail)
         db.session.commit()
 
+        flash(f"Successfully deleted mail from user {mail.sender_username}", 'success')
 
         return redirect(url_for('mail_box'))
 
@@ -767,6 +794,9 @@ def delete_item_mobile(item_id):
 
 
         return jsonify({'success': True}), 200
+
+
+
 
 
 thread = threading.Thread(target=check_auctions)

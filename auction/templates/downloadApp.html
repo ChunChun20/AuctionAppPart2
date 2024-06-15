@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+   Download BidMancer
+{% endblock %}
+
+{% block content %}
+
+<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 bg-dark mobileOnly" style="color: #323232; border-top: 1px solid #343a40;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 text-center">
+                <div class="p-lg-3 my-3">
+                    <h1 class="display-4 font-weight-normal mobileH1">Welcome to BidMancer</h1>
+                    <p class="lead font-weight-normal">Scan the QR code to download the mobile app:</p>
+                    <img src="{{ url_for('static', filename='qr_code.png') }}" alt="Download Mobile App" style="max-width: 100%; height: auto;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

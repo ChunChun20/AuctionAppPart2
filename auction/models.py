@@ -19,6 +19,8 @@ class User(db.Model,UserMixin):
     budget = db.Column(db.Integer(),nullable=False,default=1000)
     phone_number = db.Column(db.String(length=255),nullable=False)
     items = db.relationship('Item',backref='owned_user',lazy=True)
+    sent_mails = db.relationship('Mail',foreign_keys="Mail.sender_id",backref='sender',lazy=True)
+    received_mails = db.relationship('Mail', foreign_keys="Mail.receiver_id", backref='receiver', lazy=True)
 
     @property
     def password(self):
@@ -89,7 +91,9 @@ class Mail(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     subject = db.Column(db.String(length=30), nullable=False)
     message = db.Column(db.String(length=1024), nullable=False)
-    sender_id = db.Column(db.Integer(), nullable=False)
+    sender_id = db.Column(db.Integer(), db.ForeignKey('user.id'),nullable=False)
     sender_username = db.Column(db.String(length=50), nullable=False)
-    receiver_id = db.Column(db.Integer(), nullable=False)
+    receiver_id = db.Column(db.Integer(),db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.String(length=30), nullable=False)
+
+

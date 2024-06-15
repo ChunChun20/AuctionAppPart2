@@ -47,7 +47,6 @@
         <h5 class="modal-title" id="{{ item.id }}">
           <!-- -->
           {{ item.name[:-6] }}
-
         </h5>
       </div>
       <div class="modal-body">
@@ -117,7 +116,7 @@
                     <!-- Subject Field -->
                     <label for="subject">Subject:</label>
                     <div class="custom-bid-container">
-                        <input type="text" class="form-control" id="subject" name="subject" required>
+                        <input type="text" class="form-control" id="subject" name="subject" maxlength="25" required>
                     </div>
 
                     <!-- Message Field -->

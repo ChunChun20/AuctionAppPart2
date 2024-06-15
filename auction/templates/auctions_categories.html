@@ -20,13 +20,17 @@
           var itemName = items[i].name.slice(0, -6);
 
           var row = '<tr><td>' + itemName + '</td><td>' + items[i].start +
-              '</td><td>' + items[i].end + '</td><td>' + items[i].current_bid +
-              '$</td><td>' + bidderDisplay + '</td><td>' +
-              '<button class="btn btn-outline btn-success my-btn" data-toggle="modal" data-target="#Modal-BidConfirm-' + items[i].id + '">Bid now</button>' +
-              '<button class="btn btn-outline btn-warning my-btn" data-toggle="modal" data-target="#Modal-CustomBidConfirm-' + items[i].id + '">Custom bid</button>' +
-              '<button class="btn btn-outline btn-info my-btn" data-toggle="modal" data-target="#Modal-MoreInfo-' + items[i].id + '">More Info</button>' +
-              '<button class="btn btn-outline btn-light" data-toggle="modal" data-target="#Modal-MailSeller-' + items[i].id + '">Mail Seller</button>' +
-              '</td></tr>';
+    '</td><td>' + items[i].end + '</td><td>' + items[i].current_bid +
+    '$</td><td>' + bidderDisplay + '</td><td>' +
+    '<button class="btn btn-outline btn-success my-btn" data-toggle="modal" data-target="#Modal-BidConfirm-' + items[i].id + '">Bid now</button>' +
+    '<button class="btn btn-outline btn-warning my-btn" data-toggle="modal" data-target="#Modal-CustomBidConfirm-' + items[i].id + '">Custom bid</button>' +
+    '<button class="btn btn-outline btn-info my-btn" data-toggle="modal" data-target="#Modal-MoreInfo-' + items[i].id + '">' +
+          '<img src="{{ url_for("static", filename="images/info-svgrepo-com.svg") }}" alt="SendMail" class="buttonIcon">\n' +
+              '</button>' +
+    '<button class="btn btn-outline btn-light" data-toggle="modal" data-target="#Modal-MailSeller-' + items[i].id + '">' +
+    '<img src="{{ url_for("static", filename="images/mail-pencil-svgrepo-com.svg") }}" alt="SendMail" class="buttonIcon">\n' +
+    '</button>' +
+    '</td></tr>';
           tableBody.innerHTML += row;
           const num = items[i].current_bid * items[i].step;
           const next_bid = num.toFixed(2);
@@ -44,7 +48,7 @@
 Auctions
 {% endblock %}
 {% block content %}
-<div class="position-relative  p-3 p-md-5 m-md-3 text-center">
+<div class="position-relative p-3 p-md-5 m-md-3 text-center">
 
     <div class="btn-group mb-3">
         <button type="button" class="btn btn-outline-primary dropdown-toggle" style="border-radius: 20px" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -62,43 +66,45 @@ Auctions
         </div>
     </div>
 
-
-    <table id="tasks-table" class="table table-hover table-dark">
-        <thead class="table_head">
-            <tr>
-
-                <th scope="col">Name</th>
-                <th scope="col">Start</th>
-                <th scope="col">End</th>
-                <th scope="col">Current bid</th>
-                <th scope="col">Highest bidder</th>
-                <th scope="col">Options</th>
-            </tr>
-        </thead>
-        <tbody>
-
-            {% for item in items %}
-            {% include 'includes/items_modals.html' %}
+    <div class="table-responsive">
+        <table id="tasks-table" class="table table-hover table-dark">
+            <thead class="table_head">
                 <tr>
-
+                    <th scope="col">Name</th>
+                    <th scope="col">Start</th>
+                    <th scope="col">End</th>
+                    <th scope="col">Current bid</th>
+                    <th scope="col">Highest bidder</th>
+                    <th scope="col">Options</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                {% include 'includes/items_modals.html' %}
+                <tr>
                     <td>{{ item.name[:-6] }}</td>
                     <td>{{ item.start }}</td>
                     <td>{{ item.end }}</td>
                     <td>{{ item.current_bid }}$</td>
                     <td>{{ item.bidder_id }}</td>
                     <td>
-                        <button class="btn btn-outline btn-success" data-toggle="modal"  data-target="#Modal-BidConfirm-{{ item.id }}">Bid now</button>
+                        <button class="btn btn-outline btn-success" data-toggle="modal" data-target="#Modal-BidConfirm-{{ item.id }}">Bid now</button>
                         <button class="btn btn-outline btn-warning" data-toggle="modal" data-target="#Modal-CustomBidConfirm-{{ item.id }}">Custom bid</button>
-                        <button class="btn btn-outline btn-info" data-toggle="modal" data-target="#Modal-MoreInfo-{{ item.id }}">More Info</button>
-                        <button class="btn btn-outline btn-light" data-toggle="modal" data-target="#Modal-MailSeller-{{ item.id }}">Mail Seller</button>
+                        <button class="btn btn-outline btn-info" data-toggle="modal" data-target="#Modal-MoreInfo-{{ item.id }}">
+                             <img src="{{ url_for('static', filename='images/info-svgrepo-com.svg') }}" alt="Info" class="buttonIcon">
 
+                        </button>
+                        <button class="btn btn-outline btn-light" data-toggle="modal" data-target="#Modal-MailSeller-{{ item.id }}">
+                            <img src="{{ url_for('static', filename='images/mail-pencil-svgrepo-com.svg') }}" alt="SendMail" class="buttonIcon">
+
+                        </button>
                     </td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-
 
 {% endblock %}
 

@@ -10,24 +10,29 @@
 
     <!--    <h1 class="Mailbox">User Mailbox</h1>-->
 
-    {% if mails %}
+
+{% if mails %}
     {% for mail in mails %}
         {% include 'includes/reply_modal.html' %}
-
         <div class="mail-padding mb-0">
     <div class="mail row">
         <div class="col-md-12">
-            <h2 class="subject_underline">Title: {{ mail.subject }}</h2>
+            <h3 class="subject_underline"><strong>Title: {{ mail.subject }}</strong></h3>
             <div class="info-line">
                 <p class="from"><strong>From:</strong> {{ mail.sender_username }}</p>
                 <p class="date"><strong>Date:</strong> {{ mail.date }}</p>
             </div>
-            <p><strong>Message:</strong> {{ mail.message }}</p>
+            <p class="user-message"><strong>Message:</strong> {{ mail.message }}</p>
             <div class="button-container">
-                <button class="reply_btn" data-toggle="modal" data-target="#Modal-ReturnMail-{{ mail.id }}">Reply Mail</button>
+                <button class="btn btn-outline btn-light" data-toggle="modal" data-target="#Modal-ReturnMail-{{ mail.id }}">
+                    <img src="{{ url_for('static', filename='images/mail-pencil-svgrepo-com.svg') }}" alt="SendMail" class="buttonIcon">
+                </button>
                 <form method="post" action="{{ url_for('delete_mail', mail_id=mail.id) }}" style="display: inline;">
                     <input type="hidden" name="_method" value="DELETE">
-                    <button type="submit" class="delete_mail_btn">Delete Mail</button>
+                    <button type="submit" class="btn btn-outline btn-danger">
+                        <img src="{{ url_for('static', filename='images/delete-button-svgrepo-com.svg') }}" alt="Delete" class="buttonIcon">
+
+                    </button>
                 </form>
             </div>
         </div>
