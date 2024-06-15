@@ -1,0 +1,44 @@
+<style>
+    .modal-content {
+        background-color: #212121;
+    }
+</style>
+
+<div class="modal fade" id="Modal-Review-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="ReviewModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ReviewModalTitle">Place Review on {{ item.name[:-6] }} seller </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/leave_review" method="post" class="text-center">
+
+                    <input type="hidden" name="seller_id" value="{{ item.seller_id }}">
+                    <input type="hidden" name="item_name" value="{{ item.name }}">
+
+
+                    <label for="type">Review type:</label>
+                    <div class="custom-bid-container text-center">
+                        <select class="form-control" id="type" name="type" required>
+                            <option value="Positive">Positive</option>
+                            <option value="Negative">Negative</option>
+                        </select>
+                    </div>
+
+
+                    <label for="message">Review:</label>
+                    <div class="custom-bid-container text-center">
+                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary" style="background-color: #213F99 !important;border-color: #213F99;border-radius: 20px !important;">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

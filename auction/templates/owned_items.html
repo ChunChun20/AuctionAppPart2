@@ -17,6 +17,7 @@ Owned items
             <tbody>
                 {% for item in owned_items %}
                     {% include 'includes/info_modal.html' %}
+                    {% include 'includes/review_modal.html' %}
                     <tr>
                         <td>{{ item.name[:-6] }}</td>
                         <td>{{ item.current_bid }}$</td>
@@ -28,6 +29,9 @@ Owned items
                             <a href="{{ url_for('resell_page', item_id=item.id) }}" class="btn btn-outline btn-success">
                                  <img src="{{ url_for('static', filename='images/sell-svgrepo-com.svg') }}" alt="Sell" class="buttonIcon">
                             </a>
+                            <button class="btn btn-outline btn-warning" data-toggle="modal" data-target="#Modal-Review-{{ item.id }}">
+                                 <img src="{{ url_for('static', filename='images/review-screen-svgrepo-com.svg') }}" alt="Info" class="buttonIcon">
+                            </button>
                             <form method="post" action="{{ url_for('delete_item', item_id=item.id) }}" style="display: inline;">
                                 <input type="hidden" name="_method" value="DELETE">
                                 <button type="submit" class="btn btn-outline btn-danger">

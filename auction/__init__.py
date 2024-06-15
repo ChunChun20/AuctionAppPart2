@@ -14,6 +14,7 @@ from auction.connection import db,login_manager,bcrypt
 
 
 
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///auction.db'
 app.config['SECRET_KEY'] = 'ea3dfe510eafebf0ae34717a'
@@ -23,6 +24,9 @@ db.init_app(app)
 bcrypt.init_app(app)
 login_manager.init_app(app)
 socketio = SocketIO(app)
+
+
+
 
 @socketio.on('my event')
 def handle_my_custom_event(json):

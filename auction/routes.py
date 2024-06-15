@@ -9,7 +9,7 @@ from auction import app, socketio
 from auction.connection import db
 from datetime import datetime,timedelta
 from flask import render_template, redirect, url_for, flash, request, jsonify
-from auction.models import Item, User, Mail
+from auction.models import Item, User, Mail, Review
 from auction.forms import UserRegisterForm,ItemRegisterForm,LoginForm,BidForm,CustomBidForm,ItemResellForm
 from flask_login import login_user,logout_user,login_required,current_user
 from auction.funcs import check_auctions
@@ -694,7 +694,7 @@ def send_mail_to_seller():
     print(f"{seller_id},{subject},{message}")
 
 
-    return redirect(url_for('mail_box'))
+    return redirect(url_for('auction_page'))
 
 
 @app.route('/send_mail_to_seller_mobile', methods=['POST'])
@@ -796,7 +796,55 @@ def delete_item_mobile(item_id):
         return jsonify({'success': True}), 200
 
 
+@app.route('/user')
+def user_profile():
+        user_id = current_user.id
+        user = User.query.filter_by(id=user_id).first()
+        reviews = Review.query.filter_by(reviewed_user=user_id).order_by(desc(Review.id)).all()
 
+        num_positive_reviews = sum(1 for review in reviews if review.review_type == "Positive")
+        num_negative_reviews = sum(1 for review in reviews if review.review_type != "Positive")
+        return render_template('user_profile.html', user=user , num_positive_reviews=num_positive_reviews, num_negative_reviews=num_negative_reviews,reviews=reviews)
+
+
+
+@app.route('/leave_review', methods=['POST'])
+def leave_review():
+
+
+    reviewed_user = request.form.get('seller_id')
+    review_type = request.form.get("type")
+    message = request.form.get('message')
+    item_name = request.form.get('item_name')
+
+    existing_review = Review.query.filter_by(reviewer_id=current_user.id, reviewed_item=item_name).first()
+
+    if existing_review:
+        flash(f"You have already reviewed '{item_name[:-6]}'. You cannot leave another review.", 'fail')
+        return redirect(url_for('owned_items_page'))
+
+    create_review = Review(
+        reviewed_user=reviewed_user,
+        reviewer_id=current_user.id,
+        reviewer_name=current_user.username,
+        reviewed_item=item_name,
+        review_type=review_type,
+        review_message=message
+
+    )
+
+
+
+    db.session.add(create_review)
+    db.session.commit()
+
+    user = User.query.filter_by(id=reviewed_user).first()
+
+    flash(f"Successfully placed review on user {user.username} ", 'success')
+
+
+
+    return redirect(url_for('owned_items_page'))
 
 
 thread = threading.Thread(target=check_auctions)

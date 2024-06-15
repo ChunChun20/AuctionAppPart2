@@ -53,7 +53,7 @@
                 <a class="nav-link money">{{ current_user.show_budget() }}<span class="dollar-sign">$</span></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link nav-link-button" href="{{ url_for('user_profile') }}">
                     Welcome, {{ current_user.username }}
                 </a>
             </li>

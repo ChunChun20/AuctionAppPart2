@@ -540,6 +540,90 @@
 
 
 
+.mail {
+    background: #89cfef;
+    padding: 20px;
+
+    border-radius: 5px;
+    border: 2px solid rgba(255,255,255,.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+
+
+
+.profile-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        text-align: center;
+    background: #89cfef;
+    border-radius: 0px;
+    border: 2px solid rgba(255,255,255,.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    margin: 20px;
+
+    }
+
+    .info-item {
+        background-color: #ffffff;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .username {
+        grid-column: span 2;
+        font-size: 40px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color:black;
+    }
+
+    .email, .phone{
+        font-size: 18px;
+        color: black;
+    }
+
+    .positive {
+        font-size: 18px;
+        color: black;
+        background: #00cc00;
+    }
+
+    .negative {
+        font-size: 18px;
+        color: white;
+        background: #D2042D;
+    }
+
+    .reviews {
+        grid-column: span 2;
+        margin-top: 20px;
+        color:black;
+    }
+
+    .user_review {
+    background: #89cfef;
+    padding: 20px;
+
+    border-radius: 5px;
+    border: 2px solid rgba(255,255,255,.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+    .user_review.positive{
+        background-color: #00cc00;
+    }
+
+    .user_review.negative{
+        background-color: #D2042D;
+    }
+
 
 @media (max-width: 1023.98px) {
     .navbar-nav .nav-item {
@@ -623,7 +707,16 @@
     }
 
 
+@media (max-width: 768px) {
+    .profile-details {
+        flex-direction: column;
+    }
 
+    .detail-left, .detail-right {
+        flex: none;
+        width: 100%;
+    }
+}
 
 }
 

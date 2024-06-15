@@ -21,6 +21,8 @@ class User(db.Model,UserMixin):
     items = db.relationship('Item',backref='owned_user',lazy=True)
     sent_mails = db.relationship('Mail',foreign_keys="Mail.sender_id",backref='sender',lazy=True)
     received_mails = db.relationship('Mail', foreign_keys="Mail.receiver_id", backref='receiver', lazy=True)
+    user_reviews = db.relationship('Review',backref='reviewed_user_rel',lazy=True)
+
 
     @property
     def password(self):
@@ -97,3 +99,11 @@ class Mail(db.Model):
     date = db.Column(db.String(length=30), nullable=False)
 
 
+class Review(db.Model):
+    id = db.Column(db.Integer(),primary_key=True)
+    reviewed_user = db.Column(db.Integer(),db.ForeignKey('user.id'), nullable=False)
+    reviewer_id = db.Column(db.Integer(), nullable=False)
+    reviewer_name = db.Column(db.String(length=50),nullable=False)
+    reviewed_item = db.Column(db.String(length=30),nullable=False)
+    review_type = db.Column(db.String(length=50), nullable=False)
+    review_message = db.Column(db.String(length=1024), nullable=False)
