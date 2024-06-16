@@ -398,6 +398,40 @@ def get_user_data():
     return jsonify({'success': True, 'user': user_info}), 200
 
 
+@app.route('/get_user_profile',methods=['POST'])
+def get_user_profile():
+    data = request.json
+    user_id = data.get('id')
+
+    user = User.query.filter_by(id=int(user_id)).first()
+    reviews = Review.query.filter_by(reviewed_user=user_id).order_by(desc(Review.id)).all()
+    num_positive_reviews = sum(1 for review in reviews if review.review_type == "Positive")
+    num_negative_reviews = sum(1 for review in reviews if review.review_type != "Positive")
+
+
+    review_info_list = []
+    for review in reviews:
+        review_info = {
+            'reviewer_name': review.reviewer_name,
+            'review_type': review.review_type,
+            'message': review.review_message,
+            'review_id' : review.id
+        }
+        review_info_list.append(review_info)
+
+
+
+    user_info = {
+        'username': user.username,
+        'email': user.email_address,
+        'phone': user.phone_number,
+        'positive': num_positive_reviews,
+        'negative': num_negative_reviews
+    }
+
+    return jsonify({'success': True, 'user': user_info,'reviews': review_info_list}), 200
+
+
 
 @app.route('/logout')
 def logout_page():
@@ -667,12 +701,12 @@ def send_mail_to_seller():
     current_time = datetime.now()
 
 
-    seller_id = request.form.get('seller_id')  # Assuming you have a user ID in your form
+    seller_id = request.form.get('seller_id')
     subject = request.form.get('subject')
     message = request.form.get('message')
     timeOfSending = current_time.strftime("%m/%d/%Y, %H:%M:%S")
 
-    # Broadcasting the message to a specific room (user)
+
 
     create_mail = Mail(
         subject=subject,
@@ -800,12 +834,22 @@ def delete_item_mobile(item_id):
 def user_profile():
         user_id = current_user.id
         user = User.query.filter_by(id=user_id).first()
+        current_user_id = current_user.id
         reviews = Review.query.filter_by(reviewed_user=user_id).order_by(desc(Review.id)).all()
 
         num_positive_reviews = sum(1 for review in reviews if review.review_type == "Positive")
         num_negative_reviews = sum(1 for review in reviews if review.review_type != "Positive")
-        return render_template('user_profile.html', user=user , num_positive_reviews=num_positive_reviews, num_negative_reviews=num_negative_reviews,reviews=reviews)
+        return render_template('user_profile.html', user=user , num_positive_reviews=num_positive_reviews, num_negative_reviews=num_negative_reviews,reviews=reviews,current_user_id=current_user_id)
 
+@app.route('/user/<int:user_id>')
+def other_user_profile(user_id):
+    user = User.query.get(user_id)
+    current_user_id = current_user.id
+
+    reviews = Review.query.filter_by(reviewed_user=user_id).order_by(desc(Review.id)).all()
+    num_positive_reviews = sum(1 for review in reviews if review.review_type == "Positive")
+    num_negative_reviews = sum(1 for review in reviews if review.review_type != "Positive")
+    return render_template('user_profile.html', user=user, num_positive_reviews=num_positive_reviews, num_negative_reviews=num_negative_reviews, reviews=reviews,current_user_id=current_user_id)
 
 
 @app.route('/leave_review', methods=['POST'])

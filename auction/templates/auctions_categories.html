@@ -20,17 +20,17 @@
           var itemName = items[i].name.slice(0, -6);
 
           var row = '<tr><td>' + itemName + '</td><td>' + items[i].start +
-    '</td><td>' + items[i].end + '</td><td>' + items[i].current_bid +
-    '$</td><td>' + bidderDisplay + '</td><td>' +
-    '<button class="btn btn-outline btn-success my-btn" data-toggle="modal" data-target="#Modal-BidConfirm-' + items[i].id + '">Bid now</button>' +
-    '<button class="btn btn-outline btn-warning my-btn" data-toggle="modal" data-target="#Modal-CustomBidConfirm-' + items[i].id + '">Custom bid</button>' +
-    '<button class="btn btn-outline btn-info my-btn" data-toggle="modal" data-target="#Modal-MoreInfo-' + items[i].id + '">' +
-          '<img src="{{ url_for("static", filename="images/info-svgrepo-com.svg") }}" alt="SendMail" class="buttonIcon">\n' +
-              '</button>' +
-    '<button class="btn btn-outline btn-light" data-toggle="modal" data-target="#Modal-MailSeller-' + items[i].id + '">' +
-    '<img src="{{ url_for("static", filename="images/mail-pencil-svgrepo-com.svg") }}" alt="SendMail" class="buttonIcon">\n' +
-    '</button>' +
-    '</td></tr>';
+'</td><td>' + items[i].end + '</td><td>' + items[i].current_bid +
+'$</td><td>' + bidderDisplay + '</td><td>' +
+'<button class="btn btn-outline btn-success my-btn" data-toggle="modal" data-target="#Modal-BidConfirm-' + items[i].id + '">Bid now</button>' +
+'<button class="btn btn-outline btn-warning my-btn" data-toggle="modal" data-target="#Modal-CustomBidConfirm-' + items[i].id + '">Custom bid</button>' +
+'<button class="btn btn-outline btn-info my-btn" data-toggle="modal" data-target="#Modal-MoreInfo-' + items[i].id + '">' +
+'<img src="{{ url_for("static", filename="images/info-svgrepo-com.svg") }}" alt="SendMail" class="buttonIcon">\n' +
+'</button>' +
+'<a href="/user/' + items[i].seller_id + '" class="btn btn-outline btn-light">' +
+'<img src="{{ url_for("static", filename="images/user-search-svgrepo-com.svg") }}" alt="searchUser" class="buttonIcon">\n' +
+'</a>' +
+'</td></tr>'
           tableBody.innerHTML += row;
           const num = items[i].current_bid * items[i].step;
           const next_bid = num.toFixed(2);
@@ -94,10 +94,10 @@ Auctions
                              <img src="{{ url_for('static', filename='images/info-svgrepo-com.svg') }}" alt="Info" class="buttonIcon">
 
                         </button>
-                        <button class="btn btn-outline btn-light" data-toggle="modal" data-target="#Modal-MailSeller-{{ item.id }}">
-                            <img src="{{ url_for('static', filename='images/mail-pencil-svgrepo-com.svg') }}" alt="SendMail" class="buttonIcon">
+                        <a href="{{ url_for('other_user_profile', user_id=item.seller_id) }}" class="btn btn-outline btn-light">
+                                <img src="{{ url_for('static', filename='images/user-search-svgrepo-com.svg') }}" alt="searchUser" class="buttonIcon">
 
-                        </button>
+                            </a>
                     </td>
                 </tr>
                 {% endfor %}

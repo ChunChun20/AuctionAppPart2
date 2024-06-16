@@ -7,31 +7,48 @@
 {% block content %}
 <div class="profile-container">
     <div class="info-item username">
-        <h2>{{ user.username }}</h2>
+        <p>{{ user.username }}</p>
     </div>
     <div class="info-item email">
-        <h2>Email Address</h2>
+        <p>Email Address:</p>
         <p>{{ user.email_address }}</p>
     </div>
     <div class="info-item phone">
-        <h2>Phone Number</h2>
+        <p>Phone Number:</p>
         <p>0{{ user.phone_number[4:]}}</p>
     </div>
     <div class="info-item positive">
-        <h2>Positive reviews: {{ num_positive_reviews }}</h2>
+        <p>Positive reviews: {{ num_positive_reviews }}</p>
     </div>
     <div class="info-item negative">
-        <h2>Negative reviews: {{ num_negative_reviews }}</h2>
+        <p>Negative reviews: {{ num_negative_reviews }}</p>
     </div>
 
-    <div class="info-item reviews">
 
+
+    {% if user.id != current_user_id %}
+        {% include 'includes/mail_seller_modal.html' %}
+        <div class="username">
+            <button class="btn btn-outline btn-light" data-toggle="modal" data-target="#Modal-MailSeller-{{ user.id }}">
+                <img src="{{ url_for('static', filename='images/mail-pencil-svgrepo-com.svg') }}" alt="SendMail" class="buttonIcon">
+            </button>
+        </div>
+    {% endif %}
+
+
+    <div class="info-item reviews">
+    {% if reviews%}
         {% for review in reviews %}
          <div class="user_review {% if review.review_type == 'Positive' %}positive{% else %}negative{% endif %}">
-            <h3>Review from: {{ review.reviewer_name }} for Item {{ review.reviewed_item[:-6] }}</h3>
-            <p><strong>Review:</strong> {{ review.review_message }}</p>
+            <p>From: {{ review.reviewer_name }} for Item {{ review.reviewed_item[:-6] }}</p>
+            <p>Review: {{ review.review_message }}</p>
         </div>
         {% endfor %}
+        {% else %}
+    <div style="text-align: center;margin-top: 20px;">
+        <p>No Reviews to display.</p>
+    </div>
+    {% endif %}
     </div>
 </div>
 {% endblock %}

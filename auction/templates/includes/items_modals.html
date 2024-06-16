@@ -101,36 +101,6 @@
   </div>
 </div>
 
-<!--mail seller modal-->
-<div class="modal fade" id="Modal-MailSeller-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="MailSellerModal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div style="background-color:#212121;" class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="MailSellerModal">Mail Seller</h5>
-            </div>
-            <div class="modal-body">
-                <form action="/send_mail_to_seller" method="post">
-                    <!-- User ID Field -->
-                    <input type="hidden" name="seller_id" value="{{ item.seller_id }}">
-
-                    <!-- Subject Field -->
-                    <label for="subject">Subject:</label>
-                    <div class="custom-bid-container">
-                        <input type="text" class="form-control" id="subject" name="subject" maxlength="25" required>
-                    </div>
-
-                    <!-- Message Field -->
-                    <label for="message">Message:</label>
-                    <div class="custom-bid-container">
-                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" style="background-color: #213F99 !important;border-color: #213F99;border-radius: 20px !important;">Send Mail</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 
