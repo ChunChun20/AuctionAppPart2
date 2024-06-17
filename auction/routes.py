@@ -508,19 +508,19 @@ def create_item_mobile_page():
     current_time = datetime.now()
 
     if name == "":
-        return jsonify({'success': False, 'message': 'Username too short'}), 401
+        return jsonify({'success': False, 'message': 'Username too short'}), 200
 
     if description == "" or len(description) > 1024:
-        return jsonify({'success': False, 'message': 'invalid description'}), 401
+        return jsonify({'success': False, 'message': 'invalid description'}), 200
 
     if int(bid) <= 0:
-        return jsonify({'success': False, 'message': 'invalid starting price'}), 401
+        return jsonify({'success': False, 'message': 'invalid starting price'}), 200
 
     if int(duration) <= 0:
-        return jsonify({'success': False, 'message': 'invalid duration'}), 401
+        return jsonify({'success': False, 'message': 'invalid duration'}), 200
 
     if image == "":
-        return jsonify({'success': False, 'message': 'invalid image'}), 401
+        return jsonify({'success': False, 'message': 'invalid image'}), 200
 
     image_file = save_image(image)
     random_number = random.randint(100000, 999999)
@@ -572,6 +572,7 @@ def owned_items_mobile(user_id):
             'bid': item.current_bid,
             'category': item.category,
             'description': item.description,
+            'seller': item.seller_id,
             'id': item.id,
             'image': img_data  # Include image data in the response
         }
@@ -611,6 +612,7 @@ def recently_sold_items_mobile():
             'bid': item.current_bid,
             'description': item.description,
             'end': item.end,
+            'seller': item.seller_id,
             'id': item.id,
             'image': img_data  # Include image data in the response
         }
@@ -889,6 +891,45 @@ def leave_review():
 
 
     return redirect(url_for('owned_items_page'))
+
+
+@app.route('/leave_review_mobile', methods=['POST'])
+def leave_review_mobile():
+    data = request.json
+    reviewed_user = data.get('seller_id')
+    review_type = data.get('review_type')
+    message = data.get('review_message')
+    item_name = data.get('item_name')
+    reviewer = data.get("reviewer_id")
+    reviewer_username = data.get("reviewer_name")
+
+
+
+    existing_review = Review.query.filter_by(reviewer_id=reviewer, reviewed_item=item_name).first()
+    if existing_review:
+        return jsonify({'success': False, 'message': 'You already placed review on this item'}), 200
+
+    create_review = Review(
+        reviewed_user=reviewed_user,
+        reviewer_id=reviewer,
+        reviewer_name=reviewer_username,
+        reviewed_item=item_name,
+        review_type=review_type,
+        review_message=message
+
+    )
+
+    db.session.add(create_review)
+    db.session.commit()
+    user = User.query.filter_by(id=reviewed_user).first()
+
+
+    return jsonify({'success': True}), 200
+
+
+
+
+
 
 
 thread = threading.Thread(target=check_auctions)
