@@ -38,7 +38,7 @@ def auction_page():
         bid_item = request.form.get('bid_item')
         bid_item_object = Item.query.filter_by(name=bid_item).first()
         if bid_item_object:
-            if bid_item_object.owner == None:
+            if bid_item_object.owner is None and not is_auction_expired(bid_item_object):
                 if current_user.can_bid(bid_item_object):
                     if bid_item_object.bidder_id != None:
                         #refund money if outbid
@@ -58,7 +58,7 @@ def auction_page():
         custom_bid_item = request.form.get('custom_bid_item')
         custom_bid_item_object = Item.query.filter_by(name=custom_bid_item).first()
         if custom_bid_item_object:
-            if custom_bid_item_object.owner == None:
+            if custom_bid_item_object.owner is None and not is_auction_expired(custom_bid_item_object):
                 if current_user.can_custom_bid(custom_bid_item_object,custom_bid_form.custom_bid.data):
                     # refund money if outbid
                     if custom_bid_item_object.bidder_id != None:
@@ -84,43 +84,51 @@ def auction_page():
         return render_template('auctions.html',items=items,bid_form=bid_form,custom_bid_form=custom_bid_form)
 
 
+def is_auction_expired(item):
+
+    current_date = datetime.now()
+    date = datetime.strftime(current_date, "%m/%d/%Y, %H:%M:%S")
+    return date > item.end
+
 @app.route('/auctions_bid_mobile',methods=['POST'])
 def auctions_bid_mobile():
     data = request.json
     bid_item = data.get('itemName')
     currentUser = data.get('currentUser')
 
-
-
     bid_item_object = Item.query.filter_by(name=bid_item).first()
     user = User.query.filter_by(username=currentUser).first()
+
     if bid_item_object:
+        # Check if the bidding period is over
+        if bid_item_object.owner:
+            return jsonify({'success': False, 'message': 'Bidding period has ended.'}), 200
+
+        if is_auction_expired(bid_item_object):
+            return jsonify({'success': False, 'message': 'Bidding period has ended.'}), 200
+
         if user.can_bid(bid_item_object):
-            if bid_item_object.bidder_id != None:
-                    #refund money if outbid
+            # Refund money if outbid
+            if bid_item_object.bidder_id:
                 old_bidder = User.query.filter_by(username=bid_item_object.bidder_id).first()
                 old_bidder.budget += bid_item_object.current_bid
-            if bid_item_object.owner:
-                return jsonify({'success': False, 'message': f'Bidding period has ended.'}), 200
 
-                #assign highest bidder
+            # Assign highest bidder
             bid_item_object.bidder_id = user.username
-            bid_item_object.current_bid = round(bid_item_object.current_bid * bid_item_object.step,2)
-            user.budget -= round(bid_item_object.current_bid,2)
+            bid_item_object.current_bid = round(bid_item_object.current_bid * bid_item_object.step, 2)
+            user.budget -= round(bid_item_object.current_bid, 2)
             db.session.commit()
+
+            # Emit socket.io event to update items
             time.sleep(0.5)
             items = Item.query.filter_by(owner=None).all()
             items_dict = [item.to_dict() for item in items]
-            print(items_dict)
             socketio.emit('updated_items', items_dict)
-            print("Items updated")
-
-
             return jsonify({'success': True, 'message': f'Successfully placed bid on {bid_item[:-6]}'}), 200
-
         else:
-
             return jsonify({'success': False, 'message': f'Failed to place bid on {bid_item[:-6]}'}), 200
+
+    return jsonify({'success': False, 'message': 'Item not found.'}), 404
 
 
 @app.route('/auctions_custom_bid_mobile',methods=['POST'])
@@ -129,37 +137,41 @@ def auctions_custom_bid_mobile():
     custom_bid_item = data.get('itemName')
     currentUser = data.get('currentUser')
     customBid = data.get('customBid')
-    print(f"is it empty {custom_bid_item},{currentUser},{customBid}")
-
-
-
 
     user = User.query.filter_by(username=currentUser).first()
     custom_bid_item_object = Item.query.filter_by(name=custom_bid_item).first()
+
     if custom_bid_item_object:
+        # Check if the bidding period is over
+        if custom_bid_item_object.owner:
+            return jsonify({'success': False, 'message': 'Bidding period has ended.'}), 200
+
+        if is_auction_expired(custom_bid_item_object):
+            return jsonify({'success': False, 'message': 'Bidding period has ended.'}), 200
+
         if user.can_custom_bid(custom_bid_item_object, float(customBid)):
-            # refund money if outbid
-            if custom_bid_item_object.bidder_id != None:
+            # Refund money if outbid
+            if custom_bid_item_object.bidder_id:
                 old_bidder = User.query.filter_by(username=custom_bid_item_object.bidder_id).first()
                 old_bidder.budget += custom_bid_item_object.current_bid
-            if custom_bid_item_object.owner:
-                return jsonify({'success': False, 'message': f'Bidding period has ended.'}), 200
 
-            # assign highest bidder
+            # Assign highest bidder
             custom_bid_item_object.bidder_id = user.username
             custom_bid_item_object.current_bid = float(customBid)
             user.budget -= round(custom_bid_item_object.current_bid, 2)
             db.session.commit()
+
+            # Emit socket.io event to update items
             time.sleep(0.5)
             items = Item.query.filter_by(owner=None).all()
             items_dict = [item.to_dict() for item in items]
-            print(items_dict)
             socketio.emit('updated_items', items_dict)
-            print("Items updated")
-            return jsonify({'success': True, 'message': f'Successfully placed custom bid on {custom_bid_item[:-6]}'}), 200
+            return jsonify(
+                {'success': True, 'message': f'Successfully placed custom bid on {custom_bid_item[:-6]}'}), 200
         else:
-
             return jsonify({'success': False, 'message': f'Failed to place custom bid on {custom_bid_item[:-6]}'}), 200
+
+    return jsonify({'success': False, 'message': 'Item not found.'}), 404
 
 
 @app.route('/get_next_bid/<string:item_id>', methods=['GET'])
@@ -265,7 +277,7 @@ def register_page():
         login_user(create_user)
         flash("Account created successfully!",'success')
         return redirect(url_for('auction_page'))
-    if form.errors != {}: #if there are not errors from validations
+    if form.errors != {}:
         for error in form.errors.values():
             flash(error,'fail')
     return render_template('register.html',form=form)
@@ -470,7 +482,7 @@ def create_page():
 
         return redirect(url_for('auction_page'))
 
-    if form.errors != {}: #if there are not errors from validations
+    if form.errors != {}: 
         for error in form.errors.values():
             flash(error,'fail')
     return render_template('create.html',form=form)

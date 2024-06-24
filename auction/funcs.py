@@ -66,5 +66,5 @@ def check_auctions():
                         print("No more money to send SMS")
 
 
-        time.sleep(2)
+        time.sleep(60)
 
